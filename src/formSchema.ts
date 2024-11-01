@@ -27,7 +27,7 @@ const languageKnowledgeSchema = z.discriminatedUnion('knowsOtherLanguages', [
 const formSchema = z.object({
     fullName: z.string().min(1),
 }).and(workExperienceScheme)
-.and(languageKnowledgeSchema)
+    .and(languageKnowledgeSchema)
 
 type FormSchema = z.infer<typeof formSchema>;
 
