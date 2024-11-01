@@ -1,6 +1,6 @@
 import { Button, Checkbox, FormControlLabel, TextField } from "@mui/material";
 import { Container } from "./Container";
-import { FieldError, SubmitHandler, useForm, useWatch } from "react-hook-form";
+import { FieldErrors, SubmitHandler, useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { formDefaultValues, formSchema, FormSchema } from "./formSchema";
 
@@ -16,7 +16,7 @@ function App() {
     defaultValues: formDefaultValues,
   });
 
-  const fullError: FieldError<formSchema/> = errors
+  const fullErrors: FieldErrors<Extract<FormSchema, { hasWorkExperience: true }>> = errors;
 
   const hasWorkExperience = useWatch({ control, name: "hasWorkExperience" });
 
@@ -25,7 +25,12 @@ function App() {
   }
   return (
     <Container>
-      <TextField {...register('fullName')}></TextField>
+      <TextField 
+      {...register('fullName')}
+      label="Full Name"
+      helperText={fullErrors.fullName?.message}
+      error={!!fullErrors.fullName}
+      />
       <FormControlLabel {...register('hasWorkExperience')}
         label='Work Experience?'
         control={<Checkbox />}
@@ -34,8 +39,8 @@ function App() {
         <TextField
           {...register("companyName")}
           label="Company Name"
-          helperText={errors.companyName?.message}
-          error={!!errors.companyName}
+          helperText={fullErrors.companyName?.message}
+          error={!!fullErrors.companyName}
         />
       }
       <Button variant="contained" onClick={handleSubmit(onSubmit)}>
