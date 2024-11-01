@@ -1,6 +1,6 @@
-import { Button, Checkbox, FormControlLabel, IconButton, TextField } from "@mui/material";
+import { Button, Checkbox, FormControl, FormControlLabel, FormLabel, IconButton, Radio, RadioGroup, TextField } from "@mui/material";
 import { Container } from "./Container";
-import { FieldErrors, SubmitHandler, useFieldArray, useForm, useWatch } from "react-hook-form";
+import { Controller, FieldErrors, SubmitHandler, useFieldArray, useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { formDefaultValues, formSchema, FormSchema } from "./formSchema";
 import { AddCircleRounded, DeleteForeverRounded } from "@mui/icons-material";
@@ -21,17 +21,22 @@ function App() {
   const { fields, replace, append, remove } = useFieldArray({ control, name: "languages" })
 
   const fullErrors: FieldErrors<
-    Extract<FormSchema, { hasWorkExperience: true }> &
-    Extract<FormSchema, { knowsOtherLanguages: true }>> = errors;
+    Extract<FormSchema, { hasWorkExperience: true }>> &
+    FieldErrors<Extract<FormSchema, { knowsOtherLanguages: true }>> &
+    FieldErrors<Extract<FormSchema, { educationLevel: 'noFormalEducation' }>> &
+    FieldErrors<Extract<FormSchema, { educationLevel: 'highSchoolDiploma' }>> &
+    FieldErrors<Extract<FormSchema, { educationLevel: 'bachelorsDegree' }>>
+    = errors;
 
   const hasWorkExperience = useWatch({ control, name: "hasWorkExperience" });
   const knowsOtherLanguages = useWatch({ control, name: "knowsOtherLanguages" });
+  const educationLevel = useWatch({ control, name: "educationLevel" })
 
-  useEffect(() =>{
+  useEffect(() => {
     if (knowsOtherLanguages) {
-      replace([{name:""}]);
+      replace([{ name: "" }]);
     }
-  },[knowsOtherLanguages, replace])
+  }, [knowsOtherLanguages, replace])
 
   const onSubmit: SubmitHandler<FormSchema> = (data) => {
     alert(JSON.stringify(data, null, 2))
@@ -84,7 +89,52 @@ function App() {
           >
             <AddCircleRounded />
           </IconButton>
-        </>}
+        </>
+      }
+      <FormControl>
+        <FormLabel>Education Level</FormLabel>
+        <Controller
+          control={control}
+          name="educationLevel"
+          render={({ field }) => (
+            <RadioGroup {...field}>
+              <FormControlLabel
+                value={'noFormalEducation'}
+                control={<Radio />}
+                label="No Formal Education"
+              />
+              <FormControlLabel
+                value={'highSchoolDiploma'}
+                control={<Radio />}
+                label="High School Diploma"
+              />
+              <FormControlLabel
+                value={'bachelorsDegree'}
+                control={<Radio />}
+                label="Bachelors Degree"
+              />
+            </RadioGroup>
+          )}
+        />
+      </FormControl>
+      {educationLevel === 'highSchoolDiploma' && (
+        <TextField
+          {...register("schoolName")}
+          label="School Name"
+          helperText={fullErrors.schoolName?.message}
+          error={!!fullErrors.schoolName}
+        />
+      )}
+
+      {educationLevel === 'bachelorsDegree' && (
+        <TextField
+          {...register("universityName")}
+          label="University Name"
+          helperText={fullErrors.universityName?.message}
+          error={!!fullErrors.universityName}
+        />
+      )}
+
       <Button variant="contained" onClick={handleSubmit(onSubmit)}>
         Submit
       </Button>
